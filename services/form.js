@@ -1,4 +1,5 @@
 const db = require('./db');
+const { getDateTime } = require('./utils');
 
 let id = 2;
 let forms = [
@@ -17,38 +18,60 @@ let forms = [
 ];
 
 async function getAll() {
-  return forms;
+  const rows = await db.query(
+    `SELECT * 
+    FROM form`
+  );
+
+  let data = rows ? rows : [];
+
+  data.map((row) => (row.fields = JSON.parse(row.fields)));
+
+  return data;
+}
+
+async function get(id) {
+  const rows = await db.query(
+    `SELECT * 
+    FROM form
+    WHERE id=${id}`
+  );
+
+  let data = rows ? rows : [];
+
+  data.map((map) => (map.fields = JSON.parse(map.fields)));
+
+  return data;
+}
+
+async function create(name, fields) {
+  if (!name || !fields) return null;
+
+  let datetime = getDateTime();
 
   const rows = await db.query(
-    `SELECT id, name 
-    FROM forms`
+    `INSERT INTO form
+    (name, fields, created_on, updated_on)
+    VALUES (?, ?, ?, ?)`,
+    [name, JSON.stringify(fields), datetime, datetime]
   );
 
   const data = rows ? rows : [];
 
-  return {
-    data,
-  };
-}
-
-async function get(id) {
-  return forms.find((form) => form.id == id);
-}
-
-async function create(name) {
-  let data = {
-    id: ++id,
-    name,
-  };
-
-  forms.push(data);
   return data;
 }
 
 async function remove(id) {
   if (!get(id)) return false;
 
-  forms = forms.filter((form) => form.id != id);
+  const rows = await db.query(
+    `DELETE FROM form
+     WHERE id=${id}`,
+    [id]
+  );
+
+  console.log(rows.affectedRows);
+
   return true;
 }
 

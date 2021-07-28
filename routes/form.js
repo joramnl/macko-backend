@@ -10,7 +10,7 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   let data = await form.get(req.params.id);
 
-  if (data) return res.json(data);
+  if (Array.isArray(data) && data.length) return res.json(data);
 
   return res.status(404).json({
     error: 'Not found',
@@ -18,14 +18,14 @@ router.get('/:id', async (req, res) => {
 });
 
 router.post('/', async (req, res) => {
-  if (req.body.name) {
-    let data = await form.create(req.body.name);
+  if (req.body.name && req.body.fields) {
+    let data = await form.create(req.body.name, req.body.fields);
     if (!data) return res.status(500).json({ error: 500 });
 
     return res.status(201).json(data);
   }
 
-  return res.status(404).json({ error: 404 });
+  return res.status(400).json({ error: 'Missing name or fields' });
 });
 
 router.delete('/:id', async (req, res) => {

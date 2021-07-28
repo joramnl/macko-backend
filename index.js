@@ -1,8 +1,13 @@
 const express = require('express');
 const cors = require('cors');
+const { getDateTime } = require('./services/utils');
 const port = 3000;
 
+require('dotenv').config();
+
 const app = express();
+
+console.log(getDateTime());
 
 app.use(cors());
 app.use(express.json());
